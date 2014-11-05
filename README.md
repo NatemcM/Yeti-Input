@@ -72,7 +72,6 @@ This will output:
 * More support for HTML5 Elements
 * Add an ID param (without going overboard on the accepted parameters)
 * Possibly look into creating an all encompassing form builder like RORs
-* 
 
 # Version 
 
