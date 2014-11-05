@@ -5,7 +5,7 @@ Yeti Input is a simple function which creates valid HTML inputs, helping make yo
 
 ## Creating Form Inputs
 
-Yeti Input supports a number parameters, these are:
+Yeti Input supports a number of parameters, these are:
 
 * Type: Type of input i.e. Text, Color, Tel, Email
 * Name: Name of the input (`<input name="$name">`)
