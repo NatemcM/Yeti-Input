@@ -44,6 +44,9 @@ function yeti_input($type = 'text', $name, $label, $class = null, $require = nul
 		$class = "class=\"$class\" ";	
 	}
 	
+	/**
+	* Submit Button
+	*/
 	if($type == 'submit') {
 		return <<<BUILD_OUTPUT
 		<input type="submit" value="$label" name="$name" $class $require/>
@@ -52,23 +55,32 @@ BUILD_OUTPUT;
 
 	} 
 	
+	/**
+	* Select Input
+	*/
 	elseif($type == 'select'){
-		$select = "<select name=\"$name\">\r\n";
 		
-		$optionGroup = explode(': ', $label); // Create and array from the submited values
-		
+		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
+		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
+	
+		$select = "<label for=\"$name\">{$optionGroupLabel[0]}\r\n";
+		$select .= "<select name=\"$name\" id=\"$name\">\r\n";
+	
 			foreach($optionGroup as $optionValue) {
 				$valueName = str_replace(' ','', ucwords($optionValue)); // Creat Camel Case value name
 				$select .= "<option value=\"$valueName\">$optionValue</option>\r\n";
 			}
-		$select .= "</select>";
+		$select .= "</select></label>";
 		
 		return $select;
 	} 
 	
+	/**
+	* Textarea Input
+	*/
 	elseif($type == 'textarea') {
 		return <<<TEXT_AREA
-		<label>$label
+		<label for="$name">$label
     		<textarea name="$name" $class $require></textarea>
         </label>
 		
@@ -76,6 +88,9 @@ TEXT_AREA;
 
 	} 
 	
+	/**
+	* Datalist Input
+	*/
 	elseif($type == 'datalist') {
 		$dataList = "<input list=\"$name\">\r\n";
 		$dataList .= "<datalist id=\"$name\">\r\n";
@@ -89,10 +104,13 @@ TEXT_AREA;
 		
 	} 
 	
+	/**
+	* Default Input (text, tel, email, etc)
+	*/
 	else {
 	return <<<BUILD_INPUT
-	<label>$label
-	<input type="$type" name="$name" $class $require />	
+	<label for="$name">$label
+	<input type="$type" name="$name" id="$name" $class $require />	
 	</label>
 	
 BUILD_INPUT;

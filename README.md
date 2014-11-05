@@ -19,27 +19,33 @@ Creating input fields is as simple as:
 	
 This will output: 
 
-	<label>Please enter your first name
-	<input type="text" name="firstName" class="input text"  required />
+	<label for="firstName">Please enter your first name
+		<input type="text" name="firstName" class="input text" id="firstName"  required />
 	</label>
 	
 ### Creating Options
 
 Just like a text field, a select field can be created like this: 
 
-	<?= input('select', 'select', 'This: Is: A: Dropdown menu: Its nice you know'); ?>
+	<?= yeti_input('select', 'cities', 'Please Choose A City: Belfast, London, Liverpool, Kathmandu, Bath, Dublin, Glasgow, New York, Derry'); ?>
 	
-Just separate the label param with a `:` (colon).
+In the label param add your customer label followed by a `:` (colon) then just separate the list param with a `,` (comma).
  
 This will output: 
  
-	<select name="select"> 
-		<option value="This">This</option> 
-		<option value="Is">Is</option>
-		<option value="A">A</option>
-		<option value="DropdownMenu">Dropdown menu</option>
-		<option value="ItsNiceYouKnow">Its nice you know</option>
-	</select> 
+	<label for="cities">Please Choose A City
+		<select name="cities" id="cities">
+			<option value="Belfast">Belfast</option>
+			<option value="London">London</option>
+			<option value="Liverpool">Liverpool</option>
+			<option value="Kathmandu">Kathmandu</option>
+			<option value="Bath">Bath</option>
+			<option value="Dublin">Dublin</option>
+			<option value="Glasgow">Glasgow</option>
+			<option value="NewYork">New York</option>
+			<option value="Derry">Derry</option>
+		</select>
+	</label>
 	
 ### HTML5
 
@@ -75,4 +81,10 @@ This will output:
 
 # Version 
 
-* 0.1 - Initial Release 
+* 0.1.1
+	* Added `for` attribute to labels
+	* Added input `id`'s which correspond with the label `for` attribute 
+	* Added label for select element 
+	* Changed the select list separator from `:` to `,`
+	* Name the select element label using `:` 	 
+* 0.1.0 - Initial Release 
