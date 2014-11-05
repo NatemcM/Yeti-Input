@@ -35,6 +35,8 @@ THE SOFTWARE.
 
 function yeti_input($type = 'text', $name, $label, $class = null, $require = null) {
 	
+	$type = strtolower($type);
+
 	if(!empty($require)){
 		$require = 'required';	
 	}
@@ -49,9 +51,9 @@ function yeti_input($type = 'text', $name, $label, $class = null, $require = nul
 		
 BUILD_OUTPUT;
 
-	} else
-			
-	if($type == 'select'){
+	} 
+	
+	elseif($type == 'select'){
 		$select = "<select name=\"$name\">\r\n";
 		
 		$optionGroup = explode(': ', $label); // Create and array from the submited values
@@ -63,17 +65,19 @@ BUILD_OUTPUT;
 		$select .= "</select>";
 		
 		return $select;
-	} else
+	} 
 	
-	if($type == 'textarea') {
+	elseif($type == 'textarea') {
 		return <<<TEXT_AREA
 		<label>$label
     		<textarea name="$name" $class $require></textarea>
         </label>
+		
 TEXT_AREA;
-	} else
+
+	} 
 	
-	if($type == 'datalist') {
+	elseif($type == 'datalist') {
 		$dataList = "<input list=\"$name\">\r\n";
 		$dataList .= "<datalist id=\"$name\">\r\n";
 		$optionGroup = explode(': ', $label); // Create and array from the submited values
@@ -84,9 +88,9 @@ TEXT_AREA;
 		
 		return $dataList;
 		
-	} else
+	} 
 	
-	{
+	else {
 	return <<<BUILD_INPUT
 	<label>$label
 	<input type="$type" name="$name" $class $require />	
