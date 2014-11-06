@@ -33,7 +33,7 @@
 */
 
 function yeti_input($type = 'text', $name, $label, $class = null, $require = null) {
-	
+
 	$type = strtolower($type);
 
 	if(!empty($require)){
@@ -70,7 +70,7 @@ BUILD_OUTPUT;
 				$valueName = str_replace(' ','', ucwords($optionValue)); // Creat Camel Case value name
 				$select .= "<option value=\"$valueName\">$optionValue</option>\r\n";
 			}
-		$select .= "</select></label>";
+		$select .= "</select>\r\n</label>";
 		
 		return $select;
 	} 
@@ -105,16 +105,35 @@ TEXT_AREA;
 	} 
 	
 	/**
+	* Radio & Checkbox input
+	*/
+	elseif($type == 'radio' || $type == 'checkbox'){
+		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
+		$optionGroupLabel[0] = str_replace(array( '[', ']' ), '', $optionGroupLabel[0]); // Strip out array tags
+		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
+		
+		$input = "<label>{$optionGroupLabel[0]}</label>\r\n";
+		
+		foreach($optionGroup as $optionValue) {
+				$valueName = str_replace(' ','', ucwords($optionValue)); // Creat Camel Case value name
+				$input .= "<input type=\"$type\" name=\"$name\" value=\"$valueName\">$optionValue \r\n";
+			}			
+		return $input;
+		
+	}
+	
+	/**
 	* Default Input (text, tel, email, etc)
 	*/
 	else {
+		
 	return <<<BUILD_INPUT
-	<label for="$name">$label
-	<input type="$type" name="$name" id="$name" $class $require />	
+	<label>$label
+	<input type="$type" name="$name" $class $require />	
 	</label>
 	
 BUILD_INPUT;
-
+		
 	} 
 	
 }

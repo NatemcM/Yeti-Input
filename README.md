@@ -47,11 +47,48 @@ This will output:
 		</select>
 	</label>
 	
+### Radio and Checkbox Inputs 
+
+Creating radio buttons and checkboxes is as simple as creating a dropdown field:
+
+##### Radio Button
+
+	<?= yeti_input('radio', 'rating', 'Please rate our service: really really good, sort of good, good, bad, really bad, really really bad'); ?>
+	
+Outputs: 
+	
+	<label>Please rate our service</label>
+	<input type="radio" name="rating" value="ReallyReallyGood">really really good 
+	<input type="radio" name="rating" value="SortOfGood">sort of good 
+	<input type="radio" name="rating" value="Good">good 
+	<input type="radio" name="rating" value="Bad">bad 
+	<input type="radio" name="rating" value="ReallyBad">really bad 
+	<input type="radio" name="rating" value="ReallyReallyBad">really really bad  
+	
+##### Checkbox
+
+Note the use of `[]` brackets to define an array, these can also be used in text inputs.
+
+	<?= yeti_input('checkbox', 'activites[]', 'Please select the activities you enjoy: running, walking, jumping, cycling, climbing, rowing, sailing, eating'); ?>
+
+Outputs:
+
+	<label>Please select the activities you enjoy</label>
+	<input type="checkbox" name="activites[]" value="Running">running 
+	<input type="checkbox" name="activites[]" value="Walking">walking 
+	<input type="checkbox" name="activites[]" value="Jumping">jumping 
+	<input type="checkbox" name="activites[]" value="Cycling">cycling 
+	<input type="checkbox" name="activites[]" value="Climbing">climbing 
+	<input type="checkbox" name="activites[]" value="Rowing">rowing 
+	<input type="checkbox" name="activites[]" value="Sailing">sailing 
+	<input type="checkbox" name="activites[]" value="Eating">eating 
+
+
 ### HTML5
 
 Yeti Input also has limited support for HTML5 form elements such as Datalist 
 
-	<?= input('datalist', 'companies', 'Firefox: Internet Explorer: Chrome: Opera'); ?>
+	<?= yeti_input('datalist', 'companies', 'Firefox: Internet Explorer: Chrome: Opera'); ?>
 	
 This will output:
 
@@ -67,7 +104,7 @@ This will output:
 
 Creating submit buttons is easy as anything: 
 
-	<?= input('submit', 'submit', 'This is a submit button'); ?>
+	<?= yeti_input('submit', 'submit', 'This is a submit button'); ?>
 	
 This will output: 
 
@@ -81,6 +118,9 @@ This will output:
 
 # Version 
 
+* 0.1.2
+	* Added support for radio and checkbox inputs
+	* Removed `[]` in labels and ids when calling an array of inputs 	
 * 0.1.1
 	* Added `for` attribute to labels
 	* Added input `id`'s which correspond with the label `for` attribute 
