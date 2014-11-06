@@ -32,24 +32,16 @@
 *THE SOFTWARE.
 */
 
-function yeti_input($type = 'text', $name, $label, $class = null, $require = null) {
+function yeti_input($type = 'text', $name, $label, $atts = null) {
 
-	$type = strtolower($type);
-
-	if(!empty($require)){
-		$require = 'required';	
-	}
-	
-	if(!empty($class)) {
-		$class = "class=\"$class\" ";	
-	}
-	
+	$type = strtolower($type); // Convert to downcase for matching below
+		
 	/**
 	* Submit Button
 	*/
 	if($type == 'submit') {
 		return <<<BUILD_OUTPUT
-		<input type="submit" value="$label" name="$name" $class $require/>
+		<input type="submit" value="$label" name="$name" $atts>
 		
 BUILD_OUTPUT;
 
@@ -62,16 +54,24 @@ BUILD_OUTPUT;
 		
 		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
 		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
-	
+			
 		$select = "<label for=\"$name\">{$optionGroupLabel[0]}\r\n";
 		$select .= "<select name=\"$name\" id=\"$name\">\r\n";
 	
 			foreach($optionGroup as $optionValue) {
-				$valueName = str_replace(' ','', ucwords($optionValue)); // Creat Camel Case value name
-				$select .= "<option value=\"$valueName\">$optionValue</option>\r\n";
+				$valueName = str_replace(' ','', ucwords($optionValue)); // Create Camel Case value name
+				
+				if(preg_match('#\((.*?)\)#', $optionValue)) {
+					$optionValue = str_replace(array('(',')'),'',$optionValue);
+					$valueName = str_replace(array('(',')'),'', ucwords($optionValue));
+					
+					$select .= "<option value=\"$valueName\" selected>$optionValue</option>\r\n";
+				} else {
+					$select .= "<option value=\"$valueName\">$optionValue</option>\r\n";
+				}
 			}
 		$select .= "</select>\r\n</label>";
-		
+			
 		return $select;
 	} 
 	
@@ -81,7 +81,7 @@ BUILD_OUTPUT;
 	elseif($type == 'textarea') {
 		return <<<TEXT_AREA
 		<label for="$name">$label
-    		<textarea name="$name" $class $require></textarea>
+    		<textarea name="$name" $atts</textarea>
         </label>
 		
 TEXT_AREA;
@@ -92,13 +92,19 @@ TEXT_AREA;
 	* Datalist Input
 	*/
 	elseif($type == 'datalist') {
-		$dataList = "<input list=\"$name\">\r\n";
+		
+		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
+		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
+		
+		$dataList =  "<label>{$optionGroupLabel[0]}</label>\r\n";
+		$dataList .= "<input list=\"$name\" name=\"$name\">\r\n";
 		$dataList .= "<datalist id=\"$name\">\r\n";
-		$optionGroup = explode(': ', $label); // Create and array from the submited values
+		
+		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create and array from the submited values
 		foreach($optionGroup as $optionValue) {
 				$dataList .= "<option value=\"$optionValue\">\r\n";
 			}
-		$dataList .= "</datalist> ";
+		$dataList .= "</datalist>\r\n";
 		
 		return $dataList;
 		
@@ -115,7 +121,7 @@ TEXT_AREA;
 		$input = "<label>{$optionGroupLabel[0]}</label>\r\n";
 		
 		foreach($optionGroup as $optionValue) {
-				$valueName = str_replace(' ','', ucwords($optionValue)); // Creat Camel Case value name
+				$valueName = str_replace(' ','', ucwords($optionValue)); // Create Camel Case value name
 				$input .= "<input type=\"$type\" name=\"$name\" value=\"$valueName\">$optionValue \r\n";
 			}			
 		return $input;
@@ -129,7 +135,7 @@ TEXT_AREA;
 		
 	return <<<BUILD_INPUT
 	<label>$label
-	<input type="$type" name="$name" $class $require />	
+	<input type="$type" name="$name" $atts >	
 	</label>
 	
 BUILD_INPUT;
