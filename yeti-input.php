@@ -29,7 +29,7 @@
 * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-*THE SOFTWARE.
+* THE SOFTWARE.
 */
 
 function yeti_input($type = 'text', $name, $label, $atts = null) {
@@ -55,7 +55,7 @@ BUILD_OUTPUT;
 		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
 		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
 			
-		$select = "<label for=\"$name\">{$optionGroupLabel[0]}\r\n";
+		$select  = "<label for=\"$name\">{$optionGroupLabel[0]}\r\n";
 		$select .= "<select name=\"$name\" id=\"$name\">\r\n";
 	
 			foreach($optionGroup as $optionValue) {
@@ -96,13 +96,13 @@ TEXT_AREA;
 		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
 		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
 		
-		$dataList =  "<label>{$optionGroupLabel[0]}</label>\r\n";
+		$dataList  = "<label>{$optionGroupLabel[0]}</label>\r\n";
 		$dataList .= "<input list=\"$name\" name=\"$name\">\r\n";
 		$dataList .= "<datalist id=\"$name\">\r\n";
 		
 		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create and array from the submited values
 		foreach($optionGroup as $optionValue) {
-				$dataList .= "<option value=\"$optionValue\">\r\n";
+				$dataList .= "<option value=\"$optionValue\"> \r\n";
 			}
 		$dataList .= "</datalist>\r\n";
 		
@@ -122,10 +122,54 @@ TEXT_AREA;
 		
 		foreach($optionGroup as $optionValue) {
 				$valueName = str_replace(' ','', ucwords($optionValue)); // Create Camel Case value name
-				$input .= "<input type=\"$type\" name=\"$name\" value=\"$valueName\">$optionValue \r\n";
+				$input .= "<br><label for\"$valueName\">$optionValue <input type=\"$type\" name=\"$name\" value=\"$valueName\" id=\"$optionValue\"></label> \r\n";
 			}			
 		return $input;
 		
+	}
+	
+	/**
+	* Keygen input
+	*/
+	elseif($type == 'keygen'){
+	
+	return <<<BUILD_INPUT
+	<label>$label
+	<keygen name="$name" $atts >	
+	</label>
+	
+BUILD_INPUT;
+	
+	}
+	
+	/**
+	* Number tag & range slider
+	*/
+	elseif($type == 'number' || $type == 'range'){
+	
+	$splitLabel = explode(': ', $label);
+	
+	$input  = "<label>$splitLabel[0]\r\n";
+	$input .= "<input type=\"$type\" name=\"$name\" value=\"{$splitLabel[1]}\">\r\n" ;
+	$input .= "</label>";
+	
+	return $input;	
+	}
+	
+	/**
+	* Outout tag
+	*/
+	elseif($type == 'output'){
+	
+	$calcValues = explode(', ', $label);
+		
+	$input = "<output name=\"$name\" for=\"";
+	foreach($calcValues as $intVal) {
+				$input .= $intVal." ";
+			}			
+	$input .= "\"></output\r\n>";
+	
+	return $input;	
 	}
 	
 	/**

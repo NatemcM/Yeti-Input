@@ -114,11 +114,16 @@ This will output:
 # To Do
 
 * More support for HTML5 Elements
-* Add an ID param (without going overboard on the accepted parameters)
+* Add param for Checkboxes and radios to define layout rather than breaking list with a `<br>` tag.
 * Possibly look into creating an all encompassing form builder like RORs
 
 # Version 
 
+* 0.1.4
+	* Added support for keygen input
+	* Added support for output tag 
+	* Better support for number input (set a default value)
+	* Changed radio and checkboxes to use labels and separate each by `<br>` 
 * 0.1.3 
 	* Added pre-selected value for dropdown
 	* Removed required and class params
