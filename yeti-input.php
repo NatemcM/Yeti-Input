@@ -11,7 +11,7 @@
 * @version 0.1
 * @copyright The MIT License (MIT)
 *
-* Copyright (c) <2014> <Nathanael McMillan>
+* Copyright (c) 2014 Nathanael McMillan
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -173,7 +173,7 @@ BUILD_INPUT;
 	}
 	
 	/**
-	* Default Input (text, tel, email, etc)
+	* Default Input (text, tel, email, color, etc)
 	*/
 	else {
 		
@@ -186,4 +186,31 @@ BUILD_INPUT;
 		
 	} 
 	
+}
+
+/**
+* Google Recaptcha 
+* == Should the lib be included inside the function?
+*/
+function yeti_recaptcha($publicKey) {
+	require_once('Yeti-Input/recaptchalib.php');
+	return recaptcha_get_html($publicKey);
+}
+/**
+* Build the form
+*/
+function yeti_form($action = 'self', $method = 'POST', $atts = null) {
+	
+	if (strtolower($action) == 'self') {
+		$action = $_SERVER['PHP_SELF']; 	
+	} 
+	
+	$form  = "<form action=\"$action\" method=\"$method\" $atts>";
+	
+	return $form;
+	
+}
+
+function yeti_end() {
+	return '</form>';	
 }
