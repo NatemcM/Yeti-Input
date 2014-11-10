@@ -102,7 +102,7 @@ TEXT_AREA;
 		
 		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create and array from the submited values
 		foreach($optionGroup as $optionValue) {
-				$dataList .= "<option value=\"$optionValue\"> \r\n";
+				$dataList .= "<option value=\"$optionValue\">\r\n";
 			}
 		$dataList .= "</datalist>\r\n";
 		
@@ -117,15 +117,36 @@ TEXT_AREA;
 		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
 		$optionGroupLabel[0] = str_replace(array( '[', ']' ), '', $optionGroupLabel[0]); // Strip out array tags
 		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
+		/**
+		* Error checking
+		* If duplicate values are found in the paramaters we kill the form and alert the user.
+		* May change this to append/ prepend a number to the value for a unique identifier 
+		* This is case sensitive: Run & Run = same, Run & run = not same
+		*/
+		if(count(array_unique($optionGroup)) < count($optionGroup)) {
+			die ('<p style="color:#E64727">Checkbox and radio buttons must have unique options, please check your input and remove any duplicate values.</p>');
+		}
+		
+		/**
+		* Line breaks
+		* To come...
+		*/	
+		$lb1 = '<br>';	
 		
 		$input = "<label>{$optionGroupLabel[0]}</label>\r\n";
-		
+		 
 		foreach($optionGroup as $optionValue) {
-				$valueName = str_replace(' ','', ucwords($optionValue)); // Create Camel Case value name
-				$input .= "<br><label for\"$valueName\">$optionValue <input type=\"$type\" name=\"$name\" value=\"$valueName\" id=\"$optionValue\"></label> \r\n";
+				$valueName = str_replace(' ','_', $optionValue); // Create Camel Case value name
+				
+				if($type == 'radio') {
+					$creId = 'rdo_'.$optionValue;	
+				} else {
+					$creId = 'cbx_'.$optionValue;
+				}
+				$input .= "$lb1<label for=\"$creId\">$optionValue</label> <input type=\"$type\" name=\"$name\" value=\"$valueName\" id=\"$creId\">$lb2 \r\n";
 			}			
-		return $input;
 		
+		return $input;
 	}
 	
 	/**
@@ -167,7 +188,7 @@ BUILD_INPUT;
 	foreach($calcValues as $intVal) {
 				$input .= $intVal." ";
 			}			
-	$input .= "\"></output\r\n>";
+	$input .= "\"></output>\r\n>";
 	
 	return $input;	
 	}
@@ -179,7 +200,7 @@ BUILD_INPUT;
 		
 	return <<<BUILD_INPUT
 	<label>$label
-	<input type="$type" name="$name" $atts >	
+	<input type="$type" name="$name" $atts>	
 	</label>
 	
 BUILD_INPUT;
@@ -192,20 +213,28 @@ BUILD_INPUT;
 * Google Recaptcha 
 * == Should the lib be included inside the function?
 */
-function yeti_recaptcha($publicKey) {
-	require_once('Yeti-Input/recaptchalib.php');
+function yeti_recaptcha($publicKey, $path) {
+	require_once($path."recaptchalib.php");
 	return recaptcha_get_html($publicKey);
 }
 /**
 * Build the form
 */
-function yeti_form($action = 'self', $method = 'POST', $atts = null) {
+function yeti_form($action = 'self', $method = 'POST', $enctype = null, $atts = null) {
+	
+	if (strtolower($enctype) == 'text') {
+		$enctype = "text/plain"; 
+	} elseif (strtolower($enctype) == 'multipart') {
+		$enctype = "multipart/form-data"; 
+	} else {
+		$enctype = "application/x-www-form-urlencoded";
+	}
 	
 	if (strtolower($action) == 'self') {
 		$action = $_SERVER['PHP_SELF']; 	
 	} 
 	
-	$form  = "<form action=\"$action\" method=\"$method\" $atts>";
+	$form  = "<form action=\"$action\" method=\"$method\" $atts enctype=\"$enctype\">\r\n";
 	
 	return $form;
 	
