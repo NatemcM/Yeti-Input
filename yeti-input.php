@@ -1,6 +1,8 @@
 <?php
 /**
-* # Yeti Input
+* Yeti Input
+* ==========
+*
 * ## Simply create valid HTML input fields 
 *
 * Yeti Input is a simple function which creates valid 
@@ -8,7 +10,7 @@
 * and faster to write.
 * 
 * @author Nathanael McMillan
-* @version 0.1
+* @version 0.5
 * @copyright The MIT License (MIT)
 *
 * Copyright (c) 2014 Nathanael McMillan
@@ -32,33 +34,132 @@
 * THE SOFTWARE.
 */
 
-function yeti_input($type = 'text', $name, $label, $atts = null) {
+/*******************************************************************************
+* INPUT
+* Accepts anything with the HTML input tag i.e. text, email, submit, reset, date
+*******************************************************************************/
 
-	$type = strtolower($type); // Convert to downcase for matching below
-		
-	/**
-	* Submit Button
-	*/
-	if($type == 'submit') {
-		return <<<BUILD_OUTPUT
-		<input type="submit" value="$label" name="$name" $atts>
-		
-BUILD_OUTPUT;
+function input($type = 'text', $name, $label = null, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	if (strtolower($type) == 'submit' || strtolower($type) == 'reset') {
+		return <<<BUILD_INPUT
+		<input type="$type" value="$name" $atts>	
+	
+BUILD_INPUT;
+	}
+	
+	return <<<BUILD_INPUT
+	<label>$label
+		<input type="$type" name="$name" $atts>	
+	</label>
+	
+BUILD_INPUT;
 
-	} 
+}
+
+/*******************************************************************************
+* TEXTAREA
+*******************************************************************************/
+
+function textarea($name, $label, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	return <<<TEXT_AREA
+	<label for="$name">$label
+		<textarea name="$name" $atts></textarea>
+	</label>
+		
+TEXT_AREA;
+
+}
+
+/*******************************************************************************
+* RADIO
+*******************************************************************************/
+
+function radio($name, $label, $items, $break = 'br', $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	$itemsArray = explode(', ', $items);
 	
 	/**
-	* Select Input
+	* Error checking
+	* If duplicate values are found in the paramaters we kill the form and alert the user.
+	* May change this to append/ prepend a number to the value for a unique identifier 
+	* This is case sensitive: Run & Run = same, Run & run = not same
 	*/
-	elseif($type == 'select'){
-		
-		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
+	if(count(array_unique($itemsArray)) < count($itemsArray)) {
+		die ('<p style="color:#E64727">Radio buttons must have unique options, please check your input and remove any duplicate values.</p>');
+	}
+	
+		if ($break == "br") {
+			$lbStart = "<br>";
+			$lbEnd;
+		} else {
+			$lbStart = "<$break>";
+			$lbEnd = "</$break>";	
+		}
 			
-		$select  = "<label for=\"$name\">{$optionGroupLabel[0]}\r\n";
+		$input = "<label>$label</label>\r\n";
+		 
+		foreach($itemsArray as $optionValue) {
+				
+				$valueName = str_replace(' ','', ucwords($optionValue));  // Create Camel Case value name
+				$input .= "$lbStart<label for=\"rdo_$optionValue\">$optionValue <input type=\"radio\" name=\"$name\" value=\"$valueName\" id=\"rdo_$optionValue\"></label> $lbEnd \r\n";
+			}			
+		
+		return $input;
+}
+
+/*******************************************************************************
+* CHECKBOX
+*******************************************************************************/
+
+function checkbox($name, $label, $items, $break = 'br', $atts = null) {
+		
+		$atts = _extractAtts($atts);
+		$itemsArray = explode(', ', $items);
+	
+	if(count(array_unique($itemsArray)) < count($itemsArray)) {
+		die ('<p style="color:#E64727">Radio buttons must have unique options, please check your input and remove any duplicate values.</p>');
+	}
+	
+		if ($break == "br") {
+			$lbStart = "<br>";
+			$lbEnd;
+		} else {
+			$lbStart = "<$break>";
+			$lbEnd = "</$break>";	
+		}
+			
+		
+		$input = "<label>$label</label>\r\n";
+		 
+		foreach($itemsArray as $optionValue) {
+				$valueName = str_replace(' ','', ucwords($optionValue));  // Create Camel Case value name
+				
+				$input .= "$lbStart<label for=\"cbx_$optionValue\">$optionValue <input type=\"checkbox\" name=\"$name\" value=\"$valueName\" id=\"cbx_$optionValue\"></label>$lbEnd \r\n";
+			}			
+		
+		return $input;
+}
+
+/*******************************************************************************
+* SELECT
+*******************************************************************************/
+
+function select($name, $label, $items, $atts = null) {
+		
+		$atts = _extractAtts($atts);
+		$itemsArray = explode(', ', $items);
+			
+		$select  = "<label for=\"$name\">$label\r\n";
 		$select .= "<select name=\"$name\" id=\"$name\">\r\n";
 	
-			foreach($optionGroup as $optionValue) {
+			foreach($itemsArray as $optionValue) {
 				$valueName = str_replace(' ','', ucwords($optionValue)); // Create Camel Case value name
 				
 				if(preg_match('#\((.*?)\)#', $optionValue)) {
@@ -73,18 +174,70 @@ BUILD_OUTPUT;
 		$select .= "</select>\r\n</label>";
 			
 		return $select;
+}
+
+/*******************************************************************************
+* BUTTON
+*******************************************************************************/
+
+function button($type = 'submit', $name, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	return <<<BUTTON_INPUT
+		<button type="$type" name="$name" $atts>$value</button>
+BUTTON_INPUT;
+
+}
+
+
+/*******************************************************************************
+* FORM
+*******************************************************************************/
+
+function form($action = 'self', $method = 'POST', $enctype = null, $atts = null , $honeypotName = null, $honeypotValue = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	if (strtolower($enctype) == 'text') {
+		$enctype = "text/plain"; 
+	} elseif (strtolower($enctype) == 'multipart') {
+		$enctype = "multipart/form-data"; 
+	} else {
+		$enctype = "application/x-www-form-urlencoded";
+	}
+	
+	if (strtolower($action) == 'self') {
+		$action = $_SERVER['PHP_SELF']; 	
 	} 
 	
-	/**
-	* Textarea Input
-	*/
-	elseif($type == 'textarea') {
-		return <<<TEXT_AREA
-		<label for="$name">$label
-    		<textarea name="$name" $atts</textarea>
-        </label>
+	if ($honeypotName) {
+		$returnHoneypot = "<input type=\"text\" name=\"$honeypotName\" value=\"$honeypotValue\"  style=\"position:absolute; left:-9999px; top:0;\">";
+	}
+	
+	$form  = "<form action=\"$action\" method=\"$method\" $atts enctype=\"$enctype\">\r\n". $returnHoneypot;
+	
+	return $form;
+	
+}
+
+
+/*******************************************************************************
+* OLD
+*******************************************************************************/
+
+function yeti_input($type = 'text', $name, $label, $atts = null) {
+
+	$type = strtolower($type); // Convert to downcase for matching below
 		
-TEXT_AREA;
+	/**
+	* Submit Button
+	*/
+	if($type == 'submit') {
+		return <<<BUILD_OUTPUT
+		<input type="submit" value="$label" name="$name" $atts>
+		
+BUILD_OUTPUT;
 
 	} 
 	
@@ -110,44 +263,7 @@ TEXT_AREA;
 		
 	} 
 	
-	/**
-	* Radio & Checkbox input
-	*/
-	elseif($type == 'radio' || $type == 'checkbox'){
-		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
-		$optionGroupLabel[0] = str_replace(array( '[', ']' ), '', $optionGroupLabel[0]); // Strip out array tags
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
-		/**
-		* Error checking
-		* If duplicate values are found in the paramaters we kill the form and alert the user.
-		* May change this to append/ prepend a number to the value for a unique identifier 
-		* This is case sensitive: Run & Run = same, Run & run = not same
-		*/
-		if(count(array_unique($optionGroup)) < count($optionGroup)) {
-			die ('<p style="color:#E64727">Checkbox and radio buttons must have unique options, please check your input and remove any duplicate values.</p>');
-		}
-		
-		/**
-		* Line breaks
-		* To come...
-		*/	
-		$lb1 = '<br>';	
-		
-		$input = "<label>{$optionGroupLabel[0]}</label>\r\n";
-		 
-		foreach($optionGroup as $optionValue) {
-				$valueName = str_replace(' ','_', $optionValue); // Create Camel Case value name
-				
-				if($type == 'radio') {
-					$creId = 'rdo_'.$optionValue;	
-				} else {
-					$creId = 'cbx_'.$optionValue;
-				}
-				$input .= "$lb1<label for=\"$creId\">$optionValue</label> <input type=\"$type\" name=\"$name\" value=\"$valueName\" id=\"$creId\">$lb2 \r\n";
-			}			
-		
-		return $input;
-	}
+
 	
 	/**
 	* Keygen input
@@ -156,7 +272,7 @@ TEXT_AREA;
 	
 	return <<<BUILD_INPUT
 	<label>$label
-	<keygen name="$name" $atts >	
+		<keygen name="$name" $atts >	
 	</label>
 	
 BUILD_INPUT;
@@ -198,13 +314,6 @@ BUILD_INPUT;
 	*/
 	else {
 		
-	return <<<BUILD_INPUT
-	<label>$label
-	<input type="$type" name="$name" $atts>	
-	</label>
-	
-BUILD_INPUT;
-		
 	} 
 	
 }
@@ -213,33 +322,64 @@ BUILD_INPUT;
 * Google Recaptcha 
 * == Should the lib be included inside the function?
 */
-function yeti_recaptcha($publicKey, $path) {
+function recaptcha($publicKey, $path) {
 	require_once($path."recaptchalib.php");
 	return recaptcha_get_html($publicKey);
 }
-/**
-* Build the form
-*/
-function yeti_form($action = 'self', $method = 'POST', $enctype = null, $atts = null) {
-	
-	if (strtolower($enctype) == 'text') {
-		$enctype = "text/plain"; 
-	} elseif (strtolower($enctype) == 'multipart') {
-		$enctype = "multipart/form-data"; 
-	} else {
-		$enctype = "application/x-www-form-urlencoded";
-	}
-	
-	if (strtolower($action) == 'self') {
-		$action = $_SERVER['PHP_SELF']; 	
-	} 
-	
-	$form  = "<form action=\"$action\" method=\"$method\" $atts enctype=\"$enctype\">\r\n";
-	
-	return $form;
-	
-}
 
-function yeti_end() {
+
+function endForm() {
 	return '</form>';	
 }
+
+/*******************************************************************************
+* FUNCTIONS FOR FUNCTIONS
+*******************************************************************************/
+
+function _extractAtts($attsToExtract) {
+		
+	$attsArray = explode(', ', $attsToExtract);
+	
+	$idCount = 0;
+	foreach ($attsArray as $indAtts) {
+		if($indAtts[0] == '.') {
+			$classAtts .= str_replace('.', '', $indAtts).' ';	
+		}
+		elseif($indAtts[0] == '#') {
+			$idAtt .= str_replace('#', '', $indAtts).' ';	
+			$idCount ++;
+			if($idCount > 1) {
+				echo '<p style="color:#E64727">Element must only have one unique ID!</p>';
+				break;
+			}
+		} 
+		else {
+			$otherAtts .= $indAtts.' ';	
+		}
+	}
+	
+	if ($idAtt) {
+		$returnId = 	'id="'.rtrim($idAtt).'" ';
+	}
+	
+	if ($classAtts) {
+		$returnClass = 	'class="'.rtrim($classAtts).'" ';
+	}
+	
+	return $returnId.$returnClass.$otherAtts;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
