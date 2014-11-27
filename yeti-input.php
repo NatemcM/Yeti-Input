@@ -10,7 +10,7 @@
 * and faster to write.
 * 
 * @author Nathanael McMillan
-* @version 0.5
+* @version 0.1.5
 * @copyright The MIT License (MIT)
 *
 * Copyright (c) 2014 Nathanael McMillan
@@ -48,14 +48,15 @@ function input($type = 'text', $name, $label = null, $atts = null) {
 		<input type="$type" value="$name" $atts>	
 	
 BUILD_INPUT;
-	}
-	
+	} else {
+		
 	return <<<BUILD_INPUT
 	<label>$label
 		<input type="$type" name="$name" $atts>	
 	</label>
 	
 BUILD_INPUT;
+	}
 
 }
 
@@ -177,6 +178,28 @@ function select($name, $label, $items, $atts = null) {
 }
 
 /*******************************************************************************
+* DATALIST
+*******************************************************************************/
+
+function datalist($name, $label, $items, $atts = null) {
+	
+		$itemsArray = explode(', ', $items);
+		
+		$dataList  = "<label>{$label}</label>\r\n";
+		$dataList .= "<input list=\"$name\" name=\"$name\">\r\n";
+		$dataList .= "<datalist id=\"$name\">\r\n";
+		
+
+		foreach($itemsArray as $item) {
+				$dataList .= "<option value=\"$item\">\r\n";
+			}
+		$dataList .= "</datalist>\r\n";
+		
+		return $dataList;
+			
+}
+
+/*******************************************************************************
 * BUTTON
 *******************************************************************************/
 
@@ -190,12 +213,77 @@ BUTTON_INPUT;
 
 }
 
+/*******************************************************************************
+* KEYGEN
+*******************************************************************************/
+
+function keygen($name, $label, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	return <<<KEYGEN
+	<label>$label
+		<keygen name="$name" $atts>	
+	</label>
+	
+KEYGEN;
+
+}
+
+/*******************************************************************************
+* RANGE
+*******************************************************************************/
+
+function numrange($name, $label, $min, $max, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	$input  = "<label>$label\r\n";
+	$input .= "<input type=\"range\" name=\"$name\" min=\"$min\" max=\"$max\" $atts>\r\n" ;
+	$input .= "</label>";
+	
+	return $input;	
+}
+
+/*******************************************************************************
+* NUMBER
+*******************************************************************************/
+
+function number($name, $label, $min, $max, $step, $value = 0, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	$input  = "<label>$label\r\n";
+	$input .= "<input type=\"number\" name=\"$name\" min=\"$min\" max=\"$max\" step=\"$step\" value=\"$value\" $atts>\r\n" ;
+	$input .= "</label>";
+	
+	return $input;	
+	
+}
+
+/*******************************************************************************
+* OUTPUT
+*******************************************************************************/
+
+function output($name, $values, $atts = null) {
+	
+	$calcValues = explode(', ', $values);
+		
+	$input = "<output name=\"$name\" for=\"";
+	foreach($calcValues as $intVal) {
+				$input .= $intVal." ";
+			}			
+	$input .= "\"></output>\r\n>";
+	
+	return $input;
+	
+}
 
 /*******************************************************************************
 * FORM
 *******************************************************************************/
 
-function form($action = 'self', $method = 'POST', $enctype = null, $atts = null , $honeypotName = null, $honeypotValue = null) {
+function form($action = 'self', $method = 'POST', $atts = null, $enctype = null, $honeypotName = null, $honeypotValue = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -221,116 +309,27 @@ function form($action = 'self', $method = 'POST', $enctype = null, $atts = null 
 	
 }
 
-
 /*******************************************************************************
-* OLD
+* End FORM
 *******************************************************************************/
 
-function yeti_input($type = 'text', $name, $label, $atts = null) {
-
-	$type = strtolower($type); // Convert to downcase for matching below
-		
-	/**
-	* Submit Button
-	*/
-	if($type == 'submit') {
-		return <<<BUILD_OUTPUT
-		<input type="submit" value="$label" name="$name" $atts>
-		
-BUILD_OUTPUT;
-
-	} 
-	
-	/**
-	* Datalist Input
-	*/
-	elseif($type == 'datalist') {
-		
-		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
-		
-		$dataList  = "<label>{$optionGroupLabel[0]}</label>\r\n";
-		$dataList .= "<input list=\"$name\" name=\"$name\">\r\n";
-		$dataList .= "<datalist id=\"$name\">\r\n";
-		
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create and array from the submited values
-		foreach($optionGroup as $optionValue) {
-				$dataList .= "<option value=\"$optionValue\">\r\n";
-			}
-		$dataList .= "</datalist>\r\n";
-		
-		return $dataList;
-		
-	} 
-	
-
-	
-	/**
-	* Keygen input
-	*/
-	elseif($type == 'keygen'){
-	
-	return <<<BUILD_INPUT
-	<label>$label
-		<keygen name="$name" $atts >	
-	</label>
-	
-BUILD_INPUT;
-	
-	}
-	
-	/**
-	* Number tag & range slider
-	*/
-	elseif($type == 'number' || $type == 'range'){
-	
-	$splitLabel = explode(': ', $label);
-	
-	$input  = "<label>$splitLabel[0]\r\n";
-	$input .= "<input type=\"$type\" name=\"$name\" value=\"{$splitLabel[1]}\">\r\n" ;
-	$input .= "</label>";
-	
-	return $input;	
-	}
-	
-	/**
-	* Outout tag
-	*/
-	elseif($type == 'output'){
-	
-	$calcValues = explode(', ', $label);
-		
-	$input = "<output name=\"$name\" for=\"";
-	foreach($calcValues as $intVal) {
-				$input .= $intVal." ";
-			}			
-	$input .= "\"></output>\r\n>";
-	
-	return $input;	
-	}
-	
-	/**
-	* Default Input (text, tel, email, color, etc)
-	*/
-	else {
-		
-	} 
-	
+function endForm() {
+	return '</form>';	
 }
 
-/**
-* Google Recaptcha 
-* == Should the lib be included inside the function?
-*/
+
+
+/*******************************************************************************
+* GOOGLE RECAPTCHA
+*******************************************************************************/
+
 function recaptcha($publicKey, $path) {
 	require_once($path."recaptchalib.php");
 	return recaptcha_get_html($publicKey);
 }
 
 
-function endForm() {
-	return '</form>';	
-}
+//-----------------------------------------------------------------------------//
 
 /*******************************************************************************
 * FUNCTIONS FOR FUNCTIONS
@@ -368,18 +367,3 @@ function _extractAtts($attsToExtract) {
 	
 	return $returnId.$returnClass.$otherAtts;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
