@@ -5,12 +5,12 @@
 *
 * ## Simply create valid HTML input fields 
 *
-* Yeti Input is a simple function which creates valid 
+* Yeti Input is a simple function _which creates valid 
 * HTML inputs, helping make your code easier to read 
 * and faster to write.
 * 
 * @author Nathanael McMillan
-* @version 0.1.5
+* @version 0.2.0
 * @copyright The MIT License (MIT)
 *
 * Copyright (c) 2014 Nathanael McMillan
@@ -39,7 +39,7 @@
 * Accepts anything with the HTML input tag i.e. text, email, submit, reset, date
 *******************************************************************************/
 
-function input($type = 'text', $name, $label = null, $atts = null) {
+function _input($type = 'text', $name, $label = null, $atts = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -64,7 +64,7 @@ BUILD_INPUT;
 * TEXTAREA
 *******************************************************************************/
 
-function textarea($name, $label, $atts = null) {
+function _textarea($name, $label, $atts = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -81,7 +81,7 @@ TEXT_AREA;
 * RADIO
 *******************************************************************************/
 
-function radio($name, $label, $items, $break = 'br', $atts = null) {
+function _radio($name, $label, $items, $break = 'br', $atts = null) {
 	
 	$atts = _extractAtts($atts);
 	$itemsArray = explode(', ', $items);
@@ -119,7 +119,7 @@ function radio($name, $label, $items, $break = 'br', $atts = null) {
 * CHECKBOX
 *******************************************************************************/
 
-function checkbox($name, $label, $items, $break = 'br', $atts = null) {
+function _checkbox($name, $label, $items, $break = 'br', $atts = null) {
 		
 		$atts = _extractAtts($atts);
 		$itemsArray = explode(', ', $items);
@@ -152,7 +152,7 @@ function checkbox($name, $label, $items, $break = 'br', $atts = null) {
 * SELECT
 *******************************************************************************/
 
-function select($name, $label, $items, $atts = null) {
+function _select($name, $label, $items, $atts = null) {
 		
 		$atts = _extractAtts($atts);
 		$itemsArray = explode(', ', $items);
@@ -181,7 +181,7 @@ function select($name, $label, $items, $atts = null) {
 * DATALIST
 *******************************************************************************/
 
-function datalist($name, $label, $items, $atts = null) {
+function _datalist($name, $label, $items, $atts = null) {
 	
 		$itemsArray = explode(', ', $items);
 		
@@ -203,7 +203,7 @@ function datalist($name, $label, $items, $atts = null) {
 * BUTTON
 *******************************************************************************/
 
-function button($type = 'submit', $name, $atts = null) {
+function _button($type = 'submit', $name, $value, $atts = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -217,7 +217,7 @@ BUTTON_INPUT;
 * KEYGEN
 *******************************************************************************/
 
-function keygen($name, $label, $atts = null) {
+function _keygen($name, $label, $atts = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -234,7 +234,7 @@ KEYGEN;
 * RANGE
 *******************************************************************************/
 
-function numrange($name, $label, $min, $max, $atts = null) {
+function _numrange($name, $label, $min, $max, $atts = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -249,7 +249,7 @@ function numrange($name, $label, $min, $max, $atts = null) {
 * NUMBER
 *******************************************************************************/
 
-function number($name, $label, $min, $max, $step, $value = 0, $atts = null) {
+function _number($name, $label, $min, $max, $step, $value = 0, $atts = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -265,7 +265,7 @@ function number($name, $label, $min, $max, $step, $value = 0, $atts = null) {
 * OUTPUT
 *******************************************************************************/
 
-function output($name, $values, $atts = null) {
+function _output($name, $values, $atts = null) {
 	
 	$calcValues = explode(', ', $values);
 		
@@ -283,7 +283,7 @@ function output($name, $values, $atts = null) {
 * FORM
 *******************************************************************************/
 
-function form($action = 'self', $method = 'POST', $atts = null, $enctype = null, $honeypotName = null, $honeypotValue = null) {
+function _form($action = 'self', $method = 'POST', $atts = null, $enctype = null, $honeypotName = null, $honeypotValue = null) {
 	
 	$atts = _extractAtts($atts);
 	
@@ -300,7 +300,7 @@ function form($action = 'self', $method = 'POST', $atts = null, $enctype = null,
 	} 
 	
 	if ($honeypotName) {
-		$returnHoneypot = "<input type=\"text\" name=\"$honeypotName\" value=\"$honeypotValue\"  style=\"position:absolute; left:-9999px; top:0;\">";
+		$returnHoneypot = "<input type=\"text\" name=\"$honeypotName\" value=\"$honeypotValue\" style=\"position:absolute; left:-9999px; top:0;\">";
 	}
 	
 	$form  = "<form action=\"$action\" method=\"$method\" $atts enctype=\"$enctype\">\r\n". $returnHoneypot;
@@ -313,7 +313,7 @@ function form($action = 'self', $method = 'POST', $atts = null, $enctype = null,
 * End FORM
 *******************************************************************************/
 
-function endForm() {
+function _endForm() {
 	return '</form>';	
 }
 
@@ -323,7 +323,7 @@ function endForm() {
 * GOOGLE RECAPTCHA
 *******************************************************************************/
 
-function recaptcha($publicKey, $path) {
+function _recaptcha($publicKey, $path) {
 	require_once($path."recaptchalib.php");
 	return recaptcha_get_html($publicKey);
 }
@@ -339,18 +339,12 @@ function _extractAtts($attsToExtract) {
 		
 	$attsArray = explode(', ', $attsToExtract);
 	
-	$idCount = 0;
 	foreach ($attsArray as $indAtts) {
 		if($indAtts[0] == '.') {
 			$classAtts .= str_replace('.', '', $indAtts).' ';	
 		}
 		elseif($indAtts[0] == '#') {
 			$idAtt .= str_replace('#', '', $indAtts).' ';	
-			$idCount ++;
-			if($idCount > 1) {
-				echo '<p style="color:#E64727">Element must only have one unique ID!</p>';
-				break;
-			}
 		} 
 		else {
 			$otherAtts .= $indAtts.' ';	
@@ -365,5 +359,5 @@ function _extractAtts($attsToExtract) {
 		$returnClass = 	'class="'.rtrim($classAtts).'" ';
 	}
 	
-	return $returnId.$returnClass.$otherAtts;
+	return rtrim($returnId).rtrim($returnClass).rtrim($otherAtts);
 }

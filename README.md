@@ -1,124 +1,194 @@
 Yeti Input
 ==========
 
-Yeti Input is a simple function which creates valid HTML inputs, helping make your code easier to read and faster to write. 
+Yeti Input is a bunch of simple functions which creates valid HTML inputs, helping make your code easier to read and faster to write. 
 
-## Creating Form Inputs
+## Creating Forms
 
-Yeti Input supports a number of parameters, these are:
+Creating forms is simple, to start off simply write
 
-* Type: Type of input i.e. Text, Color, Tel, Email
-* Name: Name of the input (`<input name="$name">`)
-* Label: Description for the label i.e. Please enter your name
-* Attributes: Allows you to define extra attributes i.e. class="input text", required, autocomplete, etc
-	* When adding extra input attributes separate with a whitespace only 
+	<?= _form(); ?>
 
-Creating input fields is as simple as:
+This will create the following markup
 
-	<?= yeti_input('text', 'firstName', 'Please enter your first name', 'class="input text" required autocomplete) ?>
+	<form action="/index.php" method="POST" enctype="application/x-www-form-urlencoded">The `_form` function accepts the following parameters:
+
+*  `$action`: Defaults to `$_SERVER['PHP_SELF']` 
+*  `$method`: Defaults to `_POST`
+*  `$atts`
+*  `$enctype`: Defaults to `application/x-www-form-urlencoded`
+*  `$honeypotName`
+*  `$honeypotValue`
+
+## Form Inputs
+
+The `$atts` parameter accepts additional information about the input, for example:
+
+* Separate different attributes with a `,` (comma)
+* Group similar attributes together i.e. `.class .class .class` (don't separate grouped attributes with a comma)
+
+i.e. 
+
+	<?= _input('text', 'fname', 'Please enter your first name: ', '.input .text, #firstnameInput, required'); ?>
 	
-This will output: 
+will output:
 
-	<label for="firstName">Please enter your first name
-		<input type="text" name="firstName" class="input text" required autocomplete>
+		<label>Please enter your first name: 
+		<input type="text" name="name" id="firstnameInput" class="input text" required >
+		</label>
+		
+
+
+### _Input
+
+	<?= _input($type, $name, $label, $atts); ?>
+ 
+Outputs
+
+	<label>$label
+		<input type="$type" name="$name" $atts >
+	</label>
+		
+### _textarea
+
+	<?= _textarea($name, $label, $atts); ?>
+	
+Outputs
+
+	<label for="$name">$label
+		<textarea name="$name" $atts ></textarea>
+	</label> 
+	
+### _radio
+
+ `_radio` accepts parameters called `$items` and `$break`, add items to your radio button by separating each one with a comma. Choose how to separate your radios with `$break` (defaults to `<br>`)
+
+	<?= _radio('activities', 'Please select an activity: ', 'Running, Jumping, Swimming, Cycling', 'li', '.radio .input'); ?>
+	
+Outputs 
+
+	<label>Please select an activity: </label>
+	<li><label for="rdo_Running">Running <input type="radio" name="activities" value="Running" id="rdo_Running"></label> </li> 
+	<li><label for="rdo_Jumping">Jumping <input type="radio" name="activities" value="Jumping" id="rdo_Jumping"></label> </li> 
+	<li><label for="rdo_Swimming">Swimming <input type="radio" name="activities" value="Swimming" id="rdo_Swimming"></label> </li> 
+	<li><label for="rdo_Cycling">Cycling <input type="radio" name="activities" value="Cycling" id="rdo_Cycling"></label> </li> 
+	
+The `_radio` function automatically adds `rdo_` to the item name creating a unique ID for each radio button
+
+### _checkbox
+
+	<?= _checkbox($name, $label, $items, $break, $atts); ?>
+
+Outputs (Based on the radio input above)
+
+	<label>Please select an activity: </label>
+	<li><label for="cbx_Running">Running <input type="checkbox" name="activities" value="Running" id="cbx_Running"></label></li> 
+	<li><label for="cbx_Jumping">Jumping <input type="checkbox" name="activities" value="Jumping" id="cbx_Jumping"></label></li> 
+	<li><label for="cbx_Swimming">Swimming <input type="checkbox" name="activities" value="Swimming" id="cbx_Swimming"></label></li> 
+	<li><label for="cbx_Cycling">Cycling <input type="checkbox" name="activities" value="Cycling" id="cbx_Cycling"></label></li> 
+	
+To create an array of items just place `[]` after the name parameter (But before the comma (no spaces!)) i.e. `activites[]` or `$name[]` 
+	
+### _select
+
+	<?= _select($name, $label, $items, $atts); ?>
+	
+Like the radio and checkbox functions the `_select` function accepts different items sepereated by commas, to preset a value place the value in parenthesise i.e. `'Running, Jumping, (Cycling), Swimming'`. Cycling will be preselected.
+
+Outputs (Based on the radio input above)
+
+		<label for="activities">Please select an activity: 
+			<select name="activities" id="activities">
+				<option value="Running">Running</option>
+				<option value="Jumping">Jumping</option>
+				<option value="Swimming">Swimming</option>
+				<option value="Cycling">Cycling</option>
+			</select>
+		</label>
+
+### _datalist
+
+Accepts: `$name, $label, $items, $atts`
+
+	<?= _datalist('datalist', 'Select a browser', 'Internet Explorer, Firefox, Google Chrome, Opera'); ?>
+	
+Outputs 
+
+	<label>Select a browser</label>
+	<input list="datalist" name="datalist">
+		<datalist id="datalist">
+			<option value="Internet Explorer">
+			<option value="Firefox">
+			<option value="Google Chrome">
+			<option value="Opera">
+		</datalist>
+### _button 
+
+	<?= _button($type, $name, $value, $atts); ?>
+	
+Outputs 
+
+	<button type="$type" name="$name" $atts >$value</button>
+	
+### _keygen
+
+	<?= _keygen($name, $label, $atts); ?>
+	
+Outputs 
+
+	<label>$label
+		<keygen name="$name" $atts >	
 	</label>
 	
-### Creating Options
+### _numrange
 
-Just like a text field, a select field can be created like this: 
-
-	<?= yeti_input('select', 'cities', 'Please Choose A City: Belfast, (London), Liverpool, Kathmandu, Bath, Dublin, Glasgow, New York, Derry'); ?>
+	<?= _numrange($name, $label, $min, $max, $atts); ?>
 	
-In the label param add your custom label followed by a `:` (colon) then just separate the list parameters with a `,` (comma). If you want a pre-selected option wrap it in `()` 
- 
-This will output: 
- 
-	<label for="cities">Please Choose A City
-		<select name="cities" id="cities">
-			<option value="Belfast">Belfast</option>
-			<option value="London" selected>London</option>
-			<option value="Liverpool">Liverpool</option>
-			<option value="Kathmandu">Kathmandu</option>
-			<option value="Bath">Bath</option>
-			<option value="Dublin">Dublin</option>
-			<option value="Glasgow">Glasgow</option>
-			<option value="NewYork">New York</option>
-			<option value="Derry">Derry</option>
-		</select>
+Could output
+
+	 <label>Adjust the slider
+	<input type="range" name="numberRange" min="0" max="250" class="range input" >
+	</label>
+
+### _number
+
+	<?= _number($name, $label, $min, $max, $step, $value, $atts); ?>
+	
+Could output 
+
+	<label>Select a numebr between 0 and 250
+	<input type="number" name="number" min="0" max="250" step="10" value="25" class="number input" >
 	</label>
 	
-### Radio and Checkbox Inputs 
+### _output
 
-Creating radio buttons and checkboxes is as simple as creating a dropdown field:
-
-##### Radio Button
-
-	<?= yeti_input('radio', 'rating', 'Please rate our service: really really good, sort of good, good, bad, really bad, really really bad'); ?>
+	<?= _output($name, $values, $atts); ?>
 	
-Outputs: 
+### _endForm
+
+	<?= _endForm(); ?>
 	
-	<label>Please rate our service</label>
-	<input type="radio" name="rating" value="ReallyReallyGood">really really good 
-	<input type="radio" name="rating" value="SortOfGood">sort of good 
-	<input type="radio" name="rating" value="Good">good 
-	<input type="radio" name="rating" value="Bad">bad 
-	<input type="radio" name="rating" value="ReallyBad">really bad 
-	<input type="radio" name="rating" value="ReallyReallyBad">really really bad  
+Outputs `</form>`, could be easier just to type `</form>`.
+ 
+
+### _recaptcha
+
+	<?= _recaptcha($publicKey, $path); ?>
 	
-##### Checkbox
-
-Note the use of `[]` brackets to define an array, these can also be used in text inputs.
-
-	<?= yeti_input('checkbox', 'activities[]', 'Please select the activities you enjoy: running, walking, jumping, cycling, climbing, rowing, sailing, eating'); ?>
-
-Outputs:
-
-	<label>Please select the activities you enjoy</label>
-	<input type="checkbox" name="activities[]" value="Running">running 
-	<input type="checkbox" name="activities[]" value="Walking">walking 
-	<input type="checkbox" name="activities[]" value="Jumping">jumping 
-	<input type="checkbox" name="activities[]" value="Cycling">cycling 
-	<input type="checkbox" name="activities[]" value="Climbing">climbing 
-	<input type="checkbox" name="activities[]" value="Rowing">rowing 
-	<input type="checkbox" name="activities[]" value="Sailing">sailing 
-	<input type="checkbox" name="activities[]" value="Eating">eating 
-
-
-### HTML5
-
-Yeti Input also has limited support for HTML5 form elements such as Datalist 
-
-	<?= yeti_input('datalist', 'browsers', 'Please select a browser: Firefox, Internet Explorer, Chrome, Opera'); ?>
-	
-This will output:
-
-	<label>Please select a browser</label>	
-	<input list="browsers" name="browsers">
-	<datalist id="browsers">
-		<option value="Firefox">
-		<option value="Internet Explorer">
-		<option value="Chrome">
-		<option value="Opera">
-	</datalist>
-	
-### Submitting Forms
-
-Creating submit buttons is easy as anything: 
-
-	<?= yeti_input('submit', 'submit', 'This is a submit button'); ?>
-	
-This will output: 
-
-	<input type="submit" value="This is a submit button" name="submit" >
+This will automatically add in Googele Recaptcha, just make sure that `$path` is the path to your Google Recaptcha script.
 	
 # To Do
 
-* More support for HTML5 Elements
-* Add param for Checkboxes and radios to define layout rather than breaking list with a `<br>` tag.
-* Possibly look into creating an all encompassing form builder like RORs
+* Possibly look at creating a class rather than individual functions
 
 # Version 
 
+* 0.2.0
+	* Complete rewrite of code, segmenting inputs into new functions 
+	* Added support for classes and IDs within the $atts parameter
+	* Added support for Google Recaptcha 
+	* Added list break support for radio and checkbox inputs  
+	* Complete rewrite of documentation 
 * 0.1.4
 	* Added support for keygen input
 	* Added support for output tag 
