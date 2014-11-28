@@ -1,17 +1,19 @@
 <?php
 /**
-* # Yeti Input
+* Yeti Input
+* ==========
+*
 * ## Simply create valid HTML input fields 
 *
-* Yeti Input is a simple function which creates valid 
+* Yeti Input is a simple function _which creates valid 
 * HTML inputs, helping make your code easier to read 
 * and faster to write.
 * 
 * @author Nathanael McMillan
-* @version 0.1
+* @version 0.2.0
 * @copyright The MIT License (MIT)
 *
-* Copyright (c) <2014> <Nathanael McMillan>
+* Copyright (c) 2014 Nathanael McMillan
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -32,33 +34,133 @@
 * THE SOFTWARE.
 */
 
-function yeti_input($type = 'text', $name, $label, $atts = null) {
+/*******************************************************************************
+* INPUT
+* Accepts anything with the HTML input tag i.e. text, email, submit, reset, date
+*******************************************************************************/
 
-	$type = strtolower($type); // Convert to downcase for matching below
+function _input($type = 'text', $name, $label = null, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	if (strtolower($type) == 'submit' || strtolower($type) == 'reset') {
+		return <<<BUILD_INPUT
+		<input type="$type" value="$name" $atts>	
+	
+BUILD_INPUT;
+	} else {
 		
-	/**
-	* Submit Button
-	*/
-	if($type == 'submit') {
-		return <<<BUILD_OUTPUT
-		<input type="submit" value="$label" name="$name" $atts>
-		
-BUILD_OUTPUT;
+	return <<<BUILD_INPUT
+	<label>$label
+		<input type="$type" name="$name" $atts>	
+	</label>
+	
+BUILD_INPUT;
+	}
 
-	} 
+}
+
+/*******************************************************************************
+* TEXTAREA
+*******************************************************************************/
+
+function _textarea($name, $label, $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	return <<<TEXT_AREA
+	<label for="$name">$label
+		<textarea name="$name" $atts></textarea>
+	</label>
+		
+TEXT_AREA;
+
+}
+
+/*******************************************************************************
+* RADIO
+*******************************************************************************/
+
+function _radio($name, $label, $items, $break = 'br', $atts = null) {
+	
+	$atts = _extractAtts($atts);
+	$itemsArray = explode(', ', $items);
 	
 	/**
-	* Select Input
+	* Error checking
+	* If duplicate values are found in the paramaters we kill the form and alert the user.
+	* May change this to append/ prepend a number to the value for a unique identifier 
+	* This is case sensitive: Run & Run = same, Run & run = not same
 	*/
-	elseif($type == 'select'){
-		
-		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
+	if(count(array_unique($itemsArray)) < count($itemsArray)) {
+		die ('<p style="color:#E64727">Radio buttons must have unique options, please check your input and remove any duplicate values.</p>');
+	}
+	
+		if ($break == "br") {
+			$lbStart = "<br>";
+			$lbEnd;
+		} else {
+			$lbStart = "<$break>";
+			$lbEnd = "</$break>";	
+		}
 			
-		$select  = "<label for=\"$name\">{$optionGroupLabel[0]}\r\n";
+		$input = "<label>$label</label>\r\n";
+		 
+		foreach($itemsArray as $optionValue) {
+				
+				$valueName = str_replace(' ','', ucwords($optionValue));  // Create Camel Case value name
+				$input .= "$lbStart<label for=\"rdo_$optionValue\">$optionValue <input type=\"radio\" name=\"$name\" value=\"$valueName\" id=\"rdo_$optionValue\"></label> $lbEnd \r\n";
+			}			
+		
+		return $input;
+}
+
+/*******************************************************************************
+* CHECKBOX
+*******************************************************************************/
+
+function _checkbox($name, $label, $items, $break = 'br', $atts = null) {
+		
+		$atts = _extractAtts($atts);
+		$itemsArray = explode(', ', $items);
+	
+	if(count(array_unique($itemsArray)) < count($itemsArray)) {
+		die ('<p style="color:#E64727">Radio buttons must have unique options, please check your input and remove any duplicate values.</p>');
+	}
+	
+		if ($break == "br") {
+			$lbStart = "<br>";
+			$lbEnd;
+		} else {
+			$lbStart = "<$break>";
+			$lbEnd = "</$break>";	
+		}
+			
+		
+		$input = "<label>$label</label>\r\n";
+		 
+		foreach($itemsArray as $optionValue) {
+				$valueName = str_replace(' ','', ucwords($optionValue));  // Create Camel Case value name
+				
+				$input .= "$lbStart<label for=\"cbx_$optionValue\">$optionValue <input type=\"checkbox\" name=\"$name\" value=\"$valueName\" id=\"cbx_$optionValue\"></label>$lbEnd \r\n";
+			}			
+		
+		return $input;
+}
+
+/*******************************************************************************
+* SELECT
+*******************************************************************************/
+
+function _select($name, $label, $items, $atts = null) {
+		
+		$atts = _extractAtts($atts);
+		$itemsArray = explode(', ', $items);
+			
+		$select  = "<label for=\"$name\">$label\r\n";
 		$select .= "<select name=\"$name\" id=\"$name\">\r\n";
 	
-			foreach($optionGroup as $optionValue) {
+			foreach($itemsArray as $optionValue) {
 				$valueName = str_replace(' ','', ucwords($optionValue)); // Create Camel Case value name
 				
 				if(preg_match('#\((.*?)\)#', $optionValue)) {
@@ -73,117 +175,189 @@ BUILD_OUTPUT;
 		$select .= "</select>\r\n</label>";
 			
 		return $select;
-	} 
-	
-	/**
-	* Textarea Input
-	*/
-	elseif($type == 'textarea') {
-		return <<<TEXT_AREA
-		<label for="$name">$label
-    		<textarea name="$name" $atts</textarea>
-        </label>
-		
-TEXT_AREA;
+}
 
-	} 
+/*******************************************************************************
+* DATALIST
+*******************************************************************************/
+
+function _datalist($name, $label, $items, $atts = null) {
 	
-	/**
-	* Datalist Input
-	*/
-	elseif($type == 'datalist') {
+		$itemsArray = explode(', ', $items);
 		
-		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
-		
-		$dataList  = "<label>{$optionGroupLabel[0]}</label>\r\n";
+		$dataList  = "<label>{$label}</label>\r\n";
 		$dataList .= "<input list=\"$name\" name=\"$name\">\r\n";
 		$dataList .= "<datalist id=\"$name\">\r\n";
 		
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create and array from the submited values
-		foreach($optionGroup as $optionValue) {
-				$dataList .= "<option value=\"$optionValue\"> \r\n";
+
+		foreach($itemsArray as $item) {
+				$dataList .= "<option value=\"$item\">\r\n";
 			}
 		$dataList .= "</datalist>\r\n";
 		
 		return $dataList;
-		
-	} 
+			
+}
+
+/*******************************************************************************
+* BUTTON
+*******************************************************************************/
+
+function _button($type = 'submit', $name, $value, $atts = null) {
 	
-	/**
-	* Radio & Checkbox input
-	*/
-	elseif($type == 'radio' || $type == 'checkbox'){
-		$optionGroupLabel = explode(': ', $label); // Grab the name for the label
-		$optionGroupLabel[0] = str_replace(array( '[', ']' ), '', $optionGroupLabel[0]); // Strip out array tags
-		$optionGroup = explode(', ', $optionGroupLabel[1]); // Create an array from the submited values
-		
-		$input = "<label>{$optionGroupLabel[0]}</label>\r\n";
-		
-		foreach($optionGroup as $optionValue) {
-				$valueName = str_replace(' ','', ucwords($optionValue)); // Create Camel Case value name
-				$input .= "<br><label for\"$valueName\">$optionValue <input type=\"$type\" name=\"$name\" value=\"$valueName\" id=\"$optionValue\"></label> \r\n";
-			}			
-		return $input;
-		
-	}
+	$atts = _extractAtts($atts);
 	
-	/**
-	* Keygen input
-	*/
-	elseif($type == 'keygen'){
+	return <<<BUTTON_INPUT
+		<button type="$type" name="$name" $atts>$value</button>
+BUTTON_INPUT;
+
+}
+
+/*******************************************************************************
+* KEYGEN
+*******************************************************************************/
+
+function _keygen($name, $label, $atts = null) {
 	
-	return <<<BUILD_INPUT
+	$atts = _extractAtts($atts);
+	
+	return <<<KEYGEN
 	<label>$label
-	<keygen name="$name" $atts >	
+		<keygen name="$name" $atts>	
 	</label>
 	
-BUILD_INPUT;
+KEYGEN;
+
+}
+
+/*******************************************************************************
+* RANGE
+*******************************************************************************/
+
+function _numrange($name, $label, $min, $max, $atts = null) {
 	
-	}
+	$atts = _extractAtts($atts);
 	
-	/**
-	* Number tag & range slider
-	*/
-	elseif($type == 'number' || $type == 'range'){
-	
-	$splitLabel = explode(': ', $label);
-	
-	$input  = "<label>$splitLabel[0]\r\n";
-	$input .= "<input type=\"$type\" name=\"$name\" value=\"{$splitLabel[1]}\">\r\n" ;
+	$input  = "<label>$label\r\n";
+	$input .= "<input type=\"range\" name=\"$name\" min=\"$min\" max=\"$max\" $atts>\r\n" ;
 	$input .= "</label>";
 	
 	return $input;	
-	}
+}
+
+/*******************************************************************************
+* NUMBER
+*******************************************************************************/
+
+function _number($name, $label, $min, $max, $step, $value = 0, $atts = null) {
 	
-	/**
-	* Outout tag
-	*/
-	elseif($type == 'output'){
+	$atts = _extractAtts($atts);
 	
-	$calcValues = explode(', ', $label);
+	$input  = "<label>$label\r\n";
+	$input .= "<input type=\"number\" name=\"$name\" min=\"$min\" max=\"$max\" step=\"$step\" value=\"$value\" $atts>\r\n" ;
+	$input .= "</label>";
+	
+	return $input;	
+	
+}
+
+/*******************************************************************************
+* OUTPUT
+*******************************************************************************/
+
+function _output($name, $values, $atts = null) {
+	
+	$calcValues = explode(', ', $values);
 		
 	$input = "<output name=\"$name\" for=\"";
 	foreach($calcValues as $intVal) {
 				$input .= $intVal." ";
 			}			
-	$input .= "\"></output\r\n>";
+	$input .= "\"></output>\r\n>";
 	
-	return $input;	
+	return $input;
+	
+}
+
+/*******************************************************************************
+* FORM
+*******************************************************************************/
+
+function _form($action = 'self', $method = 'POST', $atts = null, $enctype = null, $honeypotName = null, $honeypotValue = null) {
+	
+	$atts = _extractAtts($atts);
+	
+	if (strtolower($enctype) == 'text') {
+		$enctype = "text/plain"; 
+	} elseif (strtolower($enctype) == 'multipart') {
+		$enctype = "multipart/form-data"; 
+	} else {
+		$enctype = "application/x-www-form-urlencoded";
 	}
 	
-	/**
-	* Default Input (text, tel, email, etc)
-	*/
-	else {
-		
-	return <<<BUILD_INPUT
-	<label>$label
-	<input type="$type" name="$name" $atts >	
-	</label>
-	
-BUILD_INPUT;
-		
+	if (strtolower($action) == 'self') {
+		$action = $_SERVER['PHP_SELF']; 	
 	} 
 	
+	if ($honeypotName) {
+		$returnHoneypot = "<input type=\"text\" name=\"$honeypotName\" value=\"$honeypotValue\" style=\"position:absolute; left:-9999px; top:0;\">";
+	}
+	
+	$form  = "<form action=\"$action\" method=\"$method\" $atts enctype=\"$enctype\">\r\n". $returnHoneypot;
+	
+	return $form;
+	
+}
+
+/*******************************************************************************
+* End FORM
+*******************************************************************************/
+
+function _endForm() {
+	return '</form>';	
+}
+
+
+
+/*******************************************************************************
+* GOOGLE RECAPTCHA
+*******************************************************************************/
+
+function _recaptcha($publicKey, $path) {
+	require_once($path."recaptchalib.php");
+	return recaptcha_get_html($publicKey);
+}
+
+
+//-----------------------------------------------------------------------------//
+
+/*******************************************************************************
+* FUNCTIONS FOR FUNCTIONS
+*******************************************************************************/
+
+function _extractAtts($attsToExtract) {
+		
+	$attsArray = explode(', ', $attsToExtract);
+	
+	foreach ($attsArray as $indAtts) {
+		if($indAtts[0] == '.') {
+			$classAtts .= str_replace('.', '', $indAtts).' ';	
+		}
+		elseif($indAtts[0] == '#') {
+			$idAtt .= str_replace('#', '', $indAtts).' ';	
+		} 
+		else {
+			$otherAtts .= $indAtts.' ';	
+		}
+	}
+	
+	if ($idAtt) {
+		$returnId = 	'id="'.rtrim($idAtt).'" ';
+	}
+	
+	if ($classAtts) {
+		$returnClass = 	'class="'.rtrim($classAtts).'" ';
+	}
+	
+	return rtrim($returnId).rtrim($returnClass).rtrim($otherAtts);
 }
